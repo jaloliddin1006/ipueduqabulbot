@@ -15,11 +15,11 @@ SECRET_KEY = env.str("SECRET_KEY")
 DEBUG = env.bool("DEBUG")
 ADMINS = env.list("ADMINS")
 
-DB_USER = env.str("DB_USER")
-DB_PASS = env.str("DB_PASS")
-DB_NAME = env.str("DB_NAME")
-DB_HOST = env.str("DB_HOST")
-DB_PORT = env.str("DB_PORT")
+# DB_USER = env.str("DB_USER")
+# DB_PASS = env.str("DB_PASS")
+# DB_NAME = env.str("DB_NAME")
+# DB_HOST = env.str("DB_HOST")
+# DB_PORT = env.str("DB_PORT")
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -129,6 +129,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'static'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
