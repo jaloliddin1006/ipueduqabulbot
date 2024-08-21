@@ -16,6 +16,7 @@ import re, os
 from django.conf import settings
 from tgbot.utils import IntegerPronunciation
 from datetime import datetime
+import subprocess
 
 PASSPORT_REGEX = re.compile(r"^[A-Z]{2}\d{7}$")
 PHONE_REGEX1 = re.compile(r"^\+998\d{9}$")
@@ -221,42 +222,53 @@ async def get_check_func(message: types.Message, state: FSMContext):
         semester=data.get('semester', 1),
     )
     
+    
+    if data.get("edu_stage") == "O'qishni ko'chirish":
+        await message.answer("Sizning ma'lumotlaringiz qabul qilindi.", reply_markup=reply.main)
+        return
+        
+    
     speciality = await sync_to_async(Speciality.objects.get)(id=data.get('speciality_id'))
 
+    # Generate DOCX file
     doc = DocxTemplate("static/templates/contract.docx")
     contract_id = contract.id
     price = speciality.get_contract_price(data.get('is_internal'))
     full_name = f"{data.get('first_name')} {data.get('last_name')} {data.get('middle_name')}"
     context = {
-        "contract_id":contract_id,
-        "date":datetime.now().strftime("%d-%m-%Y"),
-        "full_name":full_name ,
+        "contract_id": contract_id,
+        "date": datetime.now().strftime("%d-%m-%Y"),
+        "full_name": full_name,
         "edu_stage": data.get('edu_stage'),
         "speciality": data.get('speciality_name'),
         "period": speciality.get_periot(data.get('is_internal')),
         "edu_type": contract.edu_type,
         "contract_summ": price,
-        "contract_alpha":IntegerPronunciation().main(price),
-        "birthday":contract.birthday,
-        "passport":contract.passport,
-        "phone_number":contract.phone_number,
-        
+        "contract_alpha": IntegerPronunciation().main(price),
+        "birthday": contract.birthday,
+        "passport": contract.passport,
+        "phone_number": contract.phone_number,
     }
+
     doc.render(context)
 
+    # Create the directory if it doesn't exist
     os.makedirs("media/contract", exist_ok=True)
-    
-    doc.save(f"media/contract/{contract_id}-contract.docx")
+
+    # Save the DOCX file
     docx_path = f"media/contract/{contract_id}-contract.docx"
+    doc.save(docx_path)
+
+    # Convert DOCX to PDF using LibreOffice
     pdf_path = f"media/contract/{contract_id}-contract.pdf"
-    convert(docx_path, pdf_path)
+    subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', 'media/contract', docx_path])
 
     contract.contract = f"contract/{contract_id}-contract.pdf"
     await sync_to_async(contract.save)()
     
     await state.clear()
-    await message.answer("Sizning ma'lumotlaringiz qabul qilindi.", reply_markup=reply.rmk)
-    await message.answer(f"[📂 Yuklab olish | fish](http://127.0.0.1:8000/{pdf_path})", reply_markup=reply.rmk, parse_mode=ParseMode.MARKDOWN)
+    await message.answer("Sizning ma'lumotlaringiz qabul qilindi.")
+    await message.answer(f"[📂 Yuklab olish | fish](http://127.0.0.1:8000/{pdf_path})", reply_markup=reply.main, parse_mode=ParseMode.MARKDOWN)
     
 
 
