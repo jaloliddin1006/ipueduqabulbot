@@ -268,7 +268,7 @@ async def get_check_func(message: types.Message, state: FSMContext):
     
     await state.clear()
     await message.answer("Sizning ma'lumotlaringiz qabul qilindi.")
-    await message.answer(f"[📂 Yuklab olish | fish](https://onlinelibrary.uz/{pdf_path})", reply_markup=reply.main, parse_mode=ParseMode.MARKDOWN)
+    await message.answer(f"[📂 Yuklab olish | Contract](http://94.72.127.171:8080/{pdf_path})", reply_markup=reply.main, parse_mode=ParseMode.MARKDOWN)
     
 
 
