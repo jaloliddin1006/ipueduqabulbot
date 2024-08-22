@@ -243,8 +243,8 @@ async def get_check_func(message: types.Message, state: FSMContext):
     speciality = await sync_to_async(Speciality.objects.get)(id=data.get('speciality_id'))
 
     # Generate DOCX file
-    # doc_path = os.path.join(settings.BASE_DIR, "contract.docx")
-    doc = DocxTemplate("contract.docx")
+    doc_path = os.path.join(settings.BASE_DIR, "contract.docx")
+    doc = DocxTemplate(doc_path)
     contract_id = contract.id
     price = speciality.get_contract_price(data.get('is_internal'))
     full_name = f"{data.get('first_name')} {data.get('last_name')} {data.get('middle_name')}"
