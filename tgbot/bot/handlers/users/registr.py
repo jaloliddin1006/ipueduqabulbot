@@ -202,6 +202,18 @@ async def get_check_func(message: types.Message, state: FSMContext):
     await message.answer("Ma'lumotlaringizni tekshiring", reply_markup=reply.register_check)
     
 
+
+def generate_pdf(doc_path, path):
+
+    subprocess.call(['soffice',
+                 # '--headless',
+                 '--convert-to',
+                 'pdf',
+                 '--outdir',
+                 path,
+                 doc_path])
+    return doc_path
+
 @router.message(RegisterState.check, F.text == "✅ Tasdiqlash")
 async def get_check_func(message: types.Message, state: FSMContext):
     data = await state.get_data()
@@ -258,6 +270,7 @@ async def get_check_func(message: types.Message, state: FSMContext):
 
     # Save the DOCX file
     docx_path = f"media/contract/{contract_id}-contract.docx"
+    print(docx_path)
     doc.save(docx_path)
 
     # Convert DOCX to PDF using LibreOffice
@@ -265,7 +278,8 @@ async def get_check_func(message: types.Message, state: FSMContext):
     # try:
     #     convert(docx_path, pdf_path)
     # except Exception as e:
-    subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', 'media/contract', docx_path.replace("media/contract/", "")])
+    generate_pdf(docx_path, "media/contract")
+    # subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', 'media/contract', docx_path.replace("media/contract/", "")])
     # except Exception as e:
     #     print("error:           ",e)
         
