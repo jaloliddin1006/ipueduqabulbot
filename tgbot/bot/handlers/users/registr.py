@@ -7,7 +7,7 @@ from aiogram.types import InputFile
 from asgiref.sync import sync_to_async
 from docx2pdf import convert
 from docxtpl import DocxTemplate
-
+from src.settings import BASE_URL_CONTRACT
 from tgbot.bot.loader import bot
 from tgbot.bot.keyboards import reply, builders
 from tgbot.models import User, Speciality, Contract
@@ -269,7 +269,7 @@ async def get_check_func(message: types.Message, state: FSMContext):
     
     await state.clear()
     await message.answer("Sizning ma'lumotlaringiz qabul qilindi.")
-    await message.answer(f"[📂 Yuklab olish | Contract](http://94.72.127.171:8080/{pdf_path})", reply_markup=reply.main, parse_mode=ParseMode.MARKDOWN)
+    await message.answer(f"[📂 Yuklab olish | Contract]({BASE_URL_CONTRACT}{pdf_path})", reply_markup=reply.main, parse_mode=ParseMode.MARKDOWN)
     
 
 

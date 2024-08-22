@@ -12,6 +12,7 @@ if not os.path.exists(os.path.join(BASE_DIR,'.env')):
 env = Env()
 env.read_env()
 
+BASE_URL_CONTRACT = env.str("BASE_URL_CONTRACT")
 API_TOKEN = env.str("API_TOKEN")
 SECRET_KEY = env.str("SECRET_KEY")
 DEBUG = env.bool("DEBUG")
