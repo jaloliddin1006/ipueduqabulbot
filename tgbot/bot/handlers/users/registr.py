@@ -3,7 +3,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.exceptions import TelegramForbiddenError
 from aiogram.client.session.middlewares.request_logging import logger
-from aiogram.types import InputFile
+from aiogram.types import FSInputFile
 from asgiref.sync import sync_to_async
 from docx2pdf import convert
 from docxtpl import DocxTemplate
@@ -267,14 +267,14 @@ async def get_check_func(message: types.Message, state: FSMContext):
 
     # Create the directory if it doesn't exist
     os.makedirs("media/contract", exist_ok=True)
-
+    file_base_path = f"media/contract/{contract_id}-contract"
     # Save the DOCX file
-    docx_path = os.path.join(settings.BASE_DIR, f"media/contract/{contract_id}-contract.docx")
+    docx_path = os.path.join(settings.BASE_DIR, f"{file_base_path}.docx")
     print(docx_path)
     doc.save(docx_path)
 
     # Convert DOCX to PDF using LibreOffice
-    pdf_path = os.path.join(settings.BASE_DIR, f"media/contract/{contract_id}-contract.pdf")
+    pdf_path = os.path.join(settings.BASE_DIR, f"{file_base_path}.pdf")
     # try:
     #     convert(docx_path, pdf_path)
     # except Exception as e:
@@ -283,14 +283,16 @@ async def get_check_func(message: types.Message, state: FSMContext):
     # except Exception as e:
     #     print("error:           ",e)
         
-    contract.contract = pdf_path.replace("media/", "")
+    contract.contract = f"contract/{contract_id}-contract.pdf"
     await sync_to_async(contract.save)()
     
     await state.clear()
     await message.answer("Sizning ma'lumotlaringiz qabul qilindi.")
-    await message.answer(f"[📂 Yuklab olish | Contract]({BASE_URL_CONTRACT}{pdf_path})", reply_markup=reply.main, parse_mode=ParseMode.MARKDOWN)
+    await message.answer(f"[📂 Yuklab olish | Contract]({BASE_URL_CONTRACT}{file_base_path}.pdf)", reply_markup=reply.main, parse_mode=ParseMode.MARKDOWN)
     
-
+    pdf_file = FSInputFile(pdf_path)
+    await message.answer_document(pdf_file, caption="Sizning shartnomangiz tayyor. Yuklab oling.")
+  
 
 
 context = {
