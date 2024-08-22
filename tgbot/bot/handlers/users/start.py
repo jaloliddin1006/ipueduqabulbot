@@ -9,14 +9,23 @@ from django.conf import settings
 from tgbot.bot.utils.extra_datas import make_title
 from asgiref.sync import sync_to_async
 
-router = Router()
+from aiogram.types import InputMediaPhoto
 
+router = Router()
 
 @router.message(CommandStart())
 async def do_start(message: types.Message):
+    await message.answer("Assalomu alaykum", parse_mode=ParseMode.MARKDOWN, reply_markup=reply.main)
 
-    await message.answer(f"Assalomu alaykum ", parse_mode=ParseMode.MARKDOWN, reply_markup=reply.main)
+    media = [
+        InputMediaPhoto(media="AgACAgIAAxkBAAIE_mbHEKBTUjsJchjYQbJydCnwAAGTygACodgxG0rGOEqOv5vIDOJjeQEAAwIAA3kAAzUE", caption='Litsenziya'),
+        InputMediaPhoto(media="AgACAgIAAxkBAAIFAAFmxxC3iF95uS4ExK3VnISzIWEFxQACotgxG0rGOEoXZ1yOPW-TEgEAAwIAA3kAAzUE", caption='Litsenziya'),
+        InputMediaPhoto(media="AgACAgIAAxkBAAIFAmbHEMfuA3zOOSXJMnnSli53heMYAAKk2DEbSsY4SqM8qXqzL0oLAQADAgADeAADNQQ", caption='Litsenziya'),
+    ]
 
+    await message.bot.send_media_group(chat_id=message.chat.id, media=media)
+    
+    
     telegram_id = message.from_user.id
     full_name = message.from_user.full_name
     user, created = await User.objects.aget_or_create(
