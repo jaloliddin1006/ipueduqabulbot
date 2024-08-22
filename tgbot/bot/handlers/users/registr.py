@@ -269,16 +269,16 @@ async def get_check_func(message: types.Message, state: FSMContext):
     os.makedirs("media/contract", exist_ok=True)
 
     # Save the DOCX file
-    docx_path = f"media/contract/{contract_id}-contract.docx"
+    docx_path = os.path.join(settings.BASE_DIR, f"media/contract/{contract_id}-contract.docx")
     print(docx_path)
     doc.save(docx_path)
 
     # Convert DOCX to PDF using LibreOffice
-    pdf_path = f"media/contract/{contract_id}-contract.pdf"
+    pdf_path = os.path.join(settings.BASE_DIR, f"media/contract/{contract_id}-contract.pdf")
     # try:
     #     convert(docx_path, pdf_path)
     # except Exception as e:
-    generate_pdf(docx_path, "media/contract")
+    generate_pdf(docx_path, os.path.join(settings.BASE_DIR, f"media/contract"))
     # subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', 'media/contract', docx_path.replace("media/contract/", "")])
     # except Exception as e:
     #     print("error:           ",e)
