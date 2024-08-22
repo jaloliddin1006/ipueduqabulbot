@@ -265,7 +265,7 @@ async def get_check_func(message: types.Message, state: FSMContext):
     try:
         convert(docx_path, pdf_path)
     except Exception as e:
-        subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', 'media/contract', docx_path])
+        subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', 'media/contract', docx_path.replace("media/contract/", "")])
     except:
         pass
     contract.contract = pdf_path.replace("media/", "")
