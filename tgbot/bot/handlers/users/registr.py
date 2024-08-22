@@ -231,7 +231,7 @@ async def get_check_func(message: types.Message, state: FSMContext):
     speciality = await sync_to_async(Speciality.objects.get)(id=data.get('speciality_id'))
 
     # Generate DOCX file
-    doc_path = os.path.join(settings.BASE_DIR, "staticfiles", "templates", "contract.docx")
+    doc_path = os.path.join(settings.BASE_DIR, "contract.docx")
     doc = DocxTemplate(doc_path)
     contract_id = contract.id
     price = speciality.get_contract_price(data.get('is_internal'))
@@ -262,9 +262,13 @@ async def get_check_func(message: types.Message, state: FSMContext):
 
     # Convert DOCX to PDF using LibreOffice
     pdf_path = f"media/contract/{contract_id}-contract.pdf"
-    subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', 'media/contract', docx_path])
-
-    contract.contract = f"contract/{contract_id}-contract.pdf"
+    try:
+        convert(docx_path, pdf_path)
+    except Exception as e:
+        subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', 'media/contract', docx_path])
+    except:
+        pass
+    contract.contract = pdf_path.replace("media/", "")
     await sync_to_async(contract.save)()
     
     await state.clear()
