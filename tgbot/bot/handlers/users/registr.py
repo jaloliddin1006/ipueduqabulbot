@@ -81,8 +81,6 @@ async def sms_confirmation_func(message: types.Message, state: FSMContext):
     code = message.text
     sms = await sync_to_async(SMSConfirmation.objects.filter)(telegram_id=message.from_user.id, code=code, phone_number=phone_number)
     sms1 = await sync_to_async(list)(sms)
-    print(sms1, "##################### sms #####################")
-    # get sms first object
     if not sms1:
         await message.answer("Kod noto'g'ri kiritildi. Iltimos qaytadan urinib ko'ring", reply_markup=reply.ortga)
         return
@@ -298,7 +296,6 @@ async def get_check_func(message: types.Message, state: FSMContext):
     file_base_path = f"media/contract/{contract_id}-contract"
     # Save the DOCX file
     docx_path = os.path.join(settings.BASE_DIR, f"{file_base_path}.docx")
-    print(docx_path)
     doc.save(docx_path)
 
     # Convert DOCX to PDF using LibreOffice
@@ -309,7 +306,6 @@ async def get_check_func(message: types.Message, state: FSMContext):
     generate_pdf(docx_path, os.path.join(settings.BASE_DIR, f"media/contract"))
     # subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', 'media/contract', docx_path.replace("media/contract/", "")])
     # except Exception as e:
-    #     print("error:           ",e)
         
     contract.contract = f"contract/{contract_id}-contract.pdf"
     await sync_to_async(contract.save)()
