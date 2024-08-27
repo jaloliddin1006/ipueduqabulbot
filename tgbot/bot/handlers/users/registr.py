@@ -10,18 +10,19 @@ from docxtpl import DocxTemplate
 from src.settings import BASE_URL_CONTRACT
 from tgbot.bot.loader import bot
 from tgbot.bot.keyboards import reply, builders
-from tgbot.models import User, Speciality, Contract
+from tgbot.models import User, Speciality, Contract, SMSConfirmation
 from tgbot.bot.states.main import RegisterState
 import re, os
 from django.conf import settings
 from tgbot.utils import IntegerPronunciation
 from datetime import datetime
 import subprocess
+from tgbot.bot.handlers.users.sms import generate_sms_code
+
 
 PASSPORT_REGEX = re.compile(r"^[A-Z]{2}\d{7}$")
 PHONE_REGEX1 = re.compile(r"^\+998\d{9}$")
 PHONE_REGEX2 = re.compile(r"^998\d{9}$")
-PHONE_REGEX3 = re.compile(r"^\d{9}$")
 BIRTHDAY_REGEX = re.compile(r"^\d{2}\.\d{2}\.\d{4}$")
 
 
@@ -60,12 +61,39 @@ async def get_phone_number_func(message: types.Message, state: FSMContext):
     
 @router.message(RegisterState.phone_number, F.text)
 async def get_passport_func(message: types.Message, state: FSMContext):
-    if not PHONE_REGEX1.match(message.text) and not PHONE_REGEX2.match(message.text) and not PHONE_REGEX3.match(message.text):
+    if not PHONE_REGEX1.match(message.text) and not PHONE_REGEX2.match(message.text):
         await message.answer("Telefon raqamingizni noto'g'ri kiritdingiz. Iltimos qaytadan kiriting. \n\nNamuna: <code> +998932977419</code>", reply_markup=reply.ortga)
         return
     await state.update_data(phone_number=message.text)
+    result = await generate_sms_code(message.from_user.id, message.text)
+    if result.get("status") == "error":
+        await message.answer("Telefon raqam mavjud emas, sms yuborishni iloji bo'lmadi.\n Iltimos qaytadan kiriting. \n\nNamuna: <code> +998932977419</code>", reply_markup=reply.ortga)
+        return
+
+    await state.set_state(RegisterState.sms_confirm)
+    await message.answer("Sizga SMS ko'rinishida yuborilgan kodni kiriting:  ", reply_markup=reply.ortga)
+    
+    
+@router.message(RegisterState.sms_confirm, F.text)
+async def sms_confirmation_func(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    phone_number = data.get('phone_number') 
+    code = message.text
+    sms = await sync_to_async(SMSConfirmation.objects.filter)(telegram_id=message.from_user.id, code=code, phone_number=phone_number)
+    sms1 = await sync_to_async(list)(sms)
+    print(sms1, "##################### sms #####################")
+    # get sms first object
+    if not sms1:
+        await message.answer("Kod noto'g'ri kiritildi. Iltimos qaytadan urinib ko'ring", reply_markup=reply.ortga)
+        return
+    
+    sms = await sync_to_async(sms.last)()
+    sms.is_verified = True
+    await sync_to_async(sms.save)()
+    
     await state.set_state(RegisterState.passport)
-    await message.answer("Pasportingizni kiriting:\n\nNamuna: <code>AB1234567</code>", reply_markup=reply.ortga)
+    await message.answer("Pasport seriya va raqamingizni kiriting:\n\nNamuna: <code>AB1234567</code>", reply_markup=reply.ortga)
+    
     
 @router.message(RegisterState.passport, F.text)
 async def get_edu_stage_func(message: types.Message, state: FSMContext):
@@ -238,8 +266,8 @@ async def get_check_func(message: types.Message, state: FSMContext):
     if data.get("edu_stage") == "O'qishni ko'chirish":
         await message.answer("Sizning ma'lumotlaringiz qabul qilindi.", reply_markup=reply.main)
         return
-        
-    
+
+
     speciality = await sync_to_async(Speciality.objects.get)(id=data.get('speciality_id'))
 
     # Generate DOCX file
@@ -295,19 +323,19 @@ async def get_check_func(message: types.Message, state: FSMContext):
   
 
 
-context = {
-    "contract_id":8222,
-    "date":"2021-09-15",
-    "full_name":"Abdulloh Xabibullaev Abdulloevich",
-    "edu_stage":"Bakalavr",
-    "speciality":"Pedagogika va psixologiya",
-    "period":4,
-    "edu_type":"Kunduzgi",
-    "contract_summ":12000000,
-    "contract_alpha":"O'n ikki million",
-    "birthday":"15-09-1999",
-    "passport":"AA1234567",
-    "phone_number":"+998932977419",
+# context = {
+#     "contract_id":8222,
+#     "date":"2021-09-15",
+#     "full_name":"Abdulloh Xabibullaev Abdulloevich",
+#     "edu_stage":"Bakalavr",
+#     "speciality":"Pedagogika va psixologiya",
+#     "period":4,
+#     "edu_type":"Kunduzgi",
+#     "contract_summ":12000000,
+#     "contract_alpha":"O'n ikki million",
+#     "birthday":"15-09-1999",
+#     "passport":"AA1234567",
+#     "phone_number":"+998932977419",
     
-}
+# }
 

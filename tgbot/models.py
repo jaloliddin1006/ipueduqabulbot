@@ -95,3 +95,21 @@ class Contract(BaseModel):
     
     def __str__(self):
         return f"{self.user} {self.speciality}"
+    
+    
+    
+class SMSToken(BaseModel):
+    token = models.CharField(max_length=255)
+    
+    class Meta:
+        db_table = "sms_tokens"
+        
+
+class SMSConfirmation(BaseModel):
+    telegram_id = models.PositiveBigIntegerField()
+    phone_number = models.CharField(max_length=50)
+    code = models.CharField(max_length=6)
+    is_verified = models.BooleanField(default=False)
+    
+    class Meta:
+        db_table = "sms_confirmations"

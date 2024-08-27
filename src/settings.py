@@ -142,3 +142,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+SMS_EMAIL = env.str("SMS_EMAIL")
+SMS_PASSWORD = env.str("SMS_PASSWORD")
+IS_SEND_SMS=env.bool("IS_SEND_SMS")

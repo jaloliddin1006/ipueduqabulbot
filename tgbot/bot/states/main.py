@@ -11,6 +11,7 @@ class RegisterState(StatesGroup):
     last_name = State()
     middle_name = State()
     phone_number = State()
+    sms_confirm = State()
     passport = State()
     birthday = State()
     edu_stage = State()

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from tgbot.models import User as TelegramUser, BotAdmin, Contract, Speciality
+from tgbot.models import User as TelegramUser, BotAdmin, Contract, Speciality, SMSToken, SMSConfirmation
 from django.utils.html import format_html
 
 
@@ -43,3 +43,21 @@ class ContractAdmin(admin.ModelAdmin):
 
     # def speciality(self, obj):
     #     return obj.speciality.name
+
+
+@admin.register(SMSToken)
+class SMSTokenAdmin(admin.ModelAdmin):
+    list_display = ('id', 'token', 'created_at')
+    list_display_links = ('id', 'token')
+    list_per_page = 50
+    
+    
+@admin.register(SMSConfirmation)
+class SMSConfirmationAdmin(admin.ModelAdmin):
+    list_display = ('id', 'telegram_id', 'phone_number', 'code', 'is_verified', 'created_at')
+    list_display_links = ('id', 'telegram_id')
+    list_per_page = 50
+    search_fields = ('phone_number', 'code')
+    
+    def telegram_id(self, obj):
+        return str(obj.telegram_id)
