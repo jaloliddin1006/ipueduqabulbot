@@ -315,7 +315,7 @@ async def get_check_func(message: types.Message, state: FSMContext):
     # await message.answer(f"[📂 Yuklab olish | Contract]({BASE_URL_CONTRACT}{file_base_path}.pdf)", reply_markup=reply.main, parse_mode=ParseMode.MARKDOWN)
     
     pdf_file = FSInputFile(pdf_path)
-    await message.answer_document(pdf_file, caption="Sizning shartnomangiz tayyor. Yuklab oling.")
+    await message.answer_document(pdf_file, caption="Sizning shartnomangiz tayyor. Yuklab oling.", reply_markup=reply.main)
   
 
 
